@@ -86,12 +86,14 @@ class GameController {
         this.domBtnMenuRules = document.getElementById('btn-menu-rules');
         this.domBtnMenuDisclaimer = document.getElementById('btn-menu-disclaimer');
         this.domBtnMenuSound = document.getElementById('btn-menu-sound');
+        this.domBtnMenuFullscreen = document.getElementById('btn-menu-fullscreen');
         this.domBtnBackMenu = document.getElementById('btn-back-menu');
 
         // Headers & Badges
         this.domPlayerCumulative = document.getElementById('player-cumulative-score');
         this.domCurrentRound = document.getElementById('current-round');
         this.domSoundBtn = document.getElementById('btn-sound');
+        this.domFullscreenBtn = document.getElementById('btn-fullscreen');
         this.domRulesBtn = document.getElementById('btn-rules');
         this.domShuffleBtn = document.getElementById('btn-shuffle');
         this.domRestartBtn = document.getElementById('btn-restart');
@@ -230,6 +232,13 @@ class GameController {
             });
         }
 
+        if (this.domBtnMenuFullscreen) {
+            this.domBtnMenuFullscreen.addEventListener('click', () => {
+                sounds.playClick();
+                this.toggleFullscreen();
+            });
+        }
+
         // Sound toggle (Header)
         if (this.domSoundBtn) {
             this.domSoundBtn.addEventListener('click', () => {
@@ -238,6 +247,20 @@ class GameController {
                 this.logActivity(isEnabled ? 'Suara diaktifkan' : 'Suara dimatikan');
             });
         }
+
+        // Fullscreen toggle (Header)
+        if (this.domFullscreenBtn) {
+            this.domFullscreenBtn.addEventListener('click', () => {
+                sounds.playClick();
+                this.toggleFullscreen();
+            });
+        }
+
+        // Global Fullscreen Change Listener
+        document.addEventListener('fullscreenchange', () => this.syncFullscreenButtons());
+        document.addEventListener('webkitfullscreenchange', () => this.syncFullscreenButtons());
+        document.addEventListener('mozfullscreenchange', () => this.syncFullscreenButtons());
+        document.addEventListener('MSFullscreenChange', () => this.syncFullscreenButtons());
 
         // Disclaimer modal
         if (this.domCloseDisclaimerBtn) {
@@ -1352,6 +1375,56 @@ class GameController {
             this.domBtnMenuSound.innerHTML = isEnabled
                 ? '<i class="fa-solid fa-volume-high"></i> Suara: ON'
                 : '<i class="fa-solid fa-volume-xmark"></i> Suara: OFF';
+        }
+    }
+
+    /**
+     * Toggles fullscreen mode across all standard and vendor-prefixed browser APIs
+     */
+    toggleFullscreen() {
+        const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        if (!isFull) {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
+
+    /**
+     * Synchronizes fullscreen button icons and labels with the active browser display state
+     */
+    syncFullscreenButtons() {
+        const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        
+        if (this.domFullscreenBtn) {
+            this.domFullscreenBtn.innerHTML = isFull
+                ? '<i class="fa-solid fa-compress"></i>'
+                : '<i class="fa-solid fa-expand"></i>';
+            this.domFullscreenBtn.title = isFull ? 'Keluar Layar Penuh' : 'Layar Penuh (Fullscreen)';
+        }
+
+        if (this.domBtnMenuFullscreen) {
+            this.domBtnMenuFullscreen.innerHTML = isFull
+                ? '<i class="fa-solid fa-compress text-gold"></i> Normal'
+                : '<i class="fa-solid fa-expand"></i> Fullscreen';
+            this.domBtnMenuFullscreen.title = isFull ? 'Keluar Layar Penuh' : 'Layar Penuh (Fullscreen)';
         }
     }
 }
