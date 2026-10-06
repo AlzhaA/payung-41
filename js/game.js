@@ -19,6 +19,7 @@ class GameController {
         
         this.selectedCardId = null;
         this.isProcessing = false;
+        this.activeTimers = [];
 
         // Players initialization with randomized bot names
         this.randomizeBotPlayers();
@@ -30,6 +31,32 @@ class GameController {
 
         // Show Disclaimer Modal on first load (Main Menu)
         this.showDisclaimerModal();
+    }
+
+    /**
+     * Clears all pending timeouts and cancels in-flight animation callbacks
+     */
+    clearAllGameTimers() {
+        if (this.activeTimers && Array.isArray(this.activeTimers)) {
+            this.activeTimers.forEach(t => clearTimeout(t));
+        }
+        this.activeTimers = [];
+
+        // Remove any leftover flying card clones from DOM
+        document.querySelectorAll('.flying-draw-card, .flying-discard-card, .flying-deal-card').forEach(el => {
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+
+    /**
+     * Registers a timer handle for automatic cancellation on round reset
+     */
+    registerTimer(timerId) {
+        if (!this.activeTimers) this.activeTimers = [];
+        this.activeTimers.push(timerId);
+        return timerId;
     }
 
     /**
@@ -418,6 +445,9 @@ class GameController {
         this.domTurnInstruction.textContent = 'Setiap pemain menerima 4 kartu.';
         this.logActivity(`Ronde ${this.currentRound}: Membagikan 4 kartu ke masing-masing pemain...`);
 
+        // Ensure all hands are clean before dealing
+        this.players.forEach(p => p.hand = []);
+
         const totalDeals = 16;
         let currentDeal = 0;
         const dealStepInterval = 115; // Fast and snappy casino speed
@@ -428,12 +458,14 @@ class GameController {
         const dealNextCard = () => {
             if (currentDeal >= totalDeals) {
                 // All 16 cards dealt! Now flip the 1st card into the Discard Pile
-                setTimeout(() => {
+                this.registerTimer(setTimeout(() => {
                     const firstDiscard = this.deck.draw();
                     if (firstDiscard) {
                         this.updateDeckCount();
                         this.animateCardFlyDraw(this.domStockCardTop, this.domDiscardPile, firstDiscard, true, () => {
-                            this.discardPile.push(firstDiscard);
+                            if (!this.discardPile.some(c => c.id === firstDiscard.id)) {
+                                this.discardPile.push(firstDiscard);
+                            }
                             this.renderDiscardPile(true);
                             this.isProcessing = false;
                             if (typeof callback === 'function') callback();
@@ -442,7 +474,7 @@ class GameController {
                         this.isProcessing = false;
                         if (typeof callback === 'function') callback();
                     }
-                }, 280);
+                }, 280));
                 return;
             }
 
@@ -496,22 +528,24 @@ class GameController {
 
             flyer.style.transform = targetTransform;
 
-            setTimeout(() => {
+            this.registerTimer(setTimeout(() => {
                 flyer.style.opacity = '0';
                 setTimeout(() => {
                     if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
                 }, 40);
 
-                this.players[playerIndex].hand.push(card);
+                if (!this.players[playerIndex].hand.some(c => c.id === card.id)) {
+                    this.players[playerIndex].hand.push(card);
+                }
                 this.renderHands();
                 this.updateDeckCount();
                 if (isHuman) {
                     this.updatePlayerTelemetry();
                 }
-            }, 230);
+            }, 230));
 
             currentDeal++;
-            setTimeout(dealNextCard, dealStepInterval);
+            this.registerTimer(setTimeout(dealNextCard, dealStepInterval));
         };
 
         dealNextCard();
@@ -650,6 +684,7 @@ class GameController {
     }
 
     startNewRound() {
+        this.clearAllGameTimers();
         this.isProcessing = true;
         this.deck.reset();
         this.discardPile = [];
@@ -734,12 +769,18 @@ class GameController {
         this.domKnockBtn.disabled = true;
 
         const card = this.deck.draw();
+        if (!card) {
+            this.isProcessing = false;
+            return;
+        }
         this.updateDeckCount();
         this.logActivity(`Kamu mengambil kartu dari Deck (Cangkul)...`);
 
         // Trigger smooth flying draw animation from stock deck into human hand
         this.animateCardFlyDraw(this.domStockCardTop, this.domHands[0], card, true, () => {
-            this.players[0].hand.push(card);
+            if (!this.players[0].hand.some(c => c.id === card.id)) {
+                this.players[0].hand.push(card);
+            }
             this.turnPhase = 'AWAITING_DISCARD';
             this.domTurnInstruction.textContent = 'Pilih 1 kartu di tanganmu lalu buang ke tumpukan buangan.';
 
@@ -762,12 +803,18 @@ class GameController {
         this.domKnockBtn.disabled = true;
 
         const card = this.discardPile.pop();
+        if (!card) {
+            this.isProcessing = false;
+            return;
+        }
         this.logActivity(`Kamu mengambil ${card.rank}${card.suit.symbol} dari tumpukan buangan.`);
 
         // Trigger flying draw animation from discard pile into human hand
         this.animateCardFlyDraw(this.domDiscardPile, this.domHands[0], card, true, () => {
             this.renderDiscardPile();
-            this.players[0].hand.push(card);
+            if (!this.players[0].hand.some(c => c.id === card.id)) {
+                this.players[0].hand.push(card);
+            }
             this.turnPhase = 'AWAITING_DISCARD';
             this.domTurnInstruction.textContent = 'Pilih 1 kartu di tanganmu lalu buang ke tumpukan buangan.';
 
@@ -815,16 +862,16 @@ class GameController {
         // Fly to target hand position
         flyer.style.transform = `translate(${targetX - startX}px, ${targetY - startY}px) scale(${isFaceUp ? 1.05 : 0.85}) rotate(${isFaceUp ? 0 : 5}deg)`;
 
-        setTimeout(() => {
+        this.registerTimer(setTimeout(() => {
             flyer.style.opacity = '0';
-            setTimeout(() => {
+            this.registerTimer(setTimeout(() => {
                 if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
-            }, 60);
+            }, 60));
 
             if (typeof callback === 'function') {
                 callback();
             }
-        }, 360);
+        }, 360));
     }
 
     /**
@@ -863,11 +910,11 @@ class GameController {
         const randomRot = (Math.random() * 10 - 5);
         flyer.style.transform = `translate(${targetX - startX}px, ${targetY - startY}px) scale(1.04) rotate(${randomRot}deg)`;
 
-        setTimeout(() => {
+        this.registerTimer(setTimeout(() => {
             flyer.style.opacity = '0';
-            setTimeout(() => {
+            this.registerTimer(setTimeout(() => {
                 if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
-            }, 60);
+            }, 60));
 
             // Update last discard tag
             if (this.domLastDiscardTag && this.domLastDiscardText) {
@@ -878,7 +925,7 @@ class GameController {
             if (typeof callback === 'function') {
                 callback();
             }
-        }, 400);
+        }, 400));
     }
 
     handlePlayerDiscard() {
@@ -894,7 +941,7 @@ class GameController {
 
         // Get source DOM element before removing from hand
         const selectedCardEl = this.domHands[0].querySelector(`[data-card-id="${this.selectedCardId}"]`) || this.domSeats[0];
-        const discardedCard = this.players[0].hand.splice(cardIndex, 1)[0];
+        const [discardedCard] = this.players[0].hand.splice(cardIndex, 1);
         
         this.selectedCardId = null;
         this.renderPlayerHand();
@@ -905,7 +952,9 @@ class GameController {
 
         // Trigger flying card visual animation
         this.animateCardFlyToDiscard(selectedCardEl, discardedCard, 'Kamu', () => {
-            this.discardPile.push(discardedCard);
+            if (!this.discardPile.some(c => c.id === discardedCard.id)) {
+                this.discardPile.push(discardedCard);
+            }
             this.renderDiscardPile(true);
 
             // Check 41 for player
@@ -935,66 +984,76 @@ class GameController {
 
         this.showCpuBubble(cpuIndex, 'Sedang berpikir...');
 
-        setTimeout(() => {
+        this.registerTimer(setTimeout(() => {
             // Decision: Draw
             const drawSource = cpuPlayer.decideDrawSource(topDiscard);
             let drawnCard = null;
 
             const handleCpuDiscardStep = () => {
-                setTimeout(() => {
+                this.registerTimer(setTimeout(() => {
                     const cardToDiscard = cpuPlayer.decideDiscardCard();
                     if (cardToDiscard) {
                         const idx = cpuPlayer.hand.findIndex(c => c.id === cardToDiscard.id);
                         if (idx !== -1) {
-                            cpuPlayer.hand.splice(idx, 1);
+                            const [removedCard] = cpuPlayer.hand.splice(idx, 1);
+                            this.renderCpuHand(cpuIndex);
+                            this.showCpuBubble(cpuIndex, cpuPlayer.getReactionText('discard', `${removedCard.rank}${removedCard.suit.symbol}`));
+                            this.logActivity(`${cpuPlayer.name} membuang ${removedCard.rank}${removedCard.suit.symbol}...`);
+
+                            const cpuSeatEl = this.domHands[cpuIndex] || this.domSeats[cpuIndex];
+
+                            // Trigger flying card visual animation for CPU
+                            this.animateCardFlyToDiscard(cpuSeatEl, removedCard, cpuPlayer.name, () => {
+                                if (!this.discardPile.some(c => c.id === removedCard.id)) {
+                                    this.discardPile.push(removedCard);
+                                }
+                                this.renderDiscardPile(true);
+
+                                // Check 41 for CPU
+                                const cpuScore = evaluateHandScore(cpuPlayer.hand);
+                                if (cpuScore.isFortyOne) {
+                                    sounds.playFortyOneExplosion();
+                                    this.logActivity(`FORTY ONE! ${cpuPlayer.name} mencapai 41 POIN!`);
+                                    this.endRound(`${cpuPlayer.name} Mencapai 41 Poin!`);
+                                    return;
+                                }
+
+                                // Check deck count
+                                if (this.deck.remaining() === 0) {
+                                    this.logActivity('Deck habis! Menghitung skor akhir...');
+                                    this.endRound('Kartu di deck telah habis!');
+                                    return;
+                                }
+
+                                this.registerTimer(setTimeout(() => {
+                                    this.hideCpuBubble(cpuIndex);
+                                    this.nextTurn();
+                                }, 500));
+                            });
+                        } else {
+                            this.nextTurn();
                         }
-                        this.renderCpuHand(cpuIndex);
-                        this.showCpuBubble(cpuIndex, cpuPlayer.getReactionText('discard', `${cardToDiscard.rank}${cardToDiscard.suit.symbol}`));
-                        this.logActivity(`${cpuPlayer.name} membuang ${cardToDiscard.rank}${cardToDiscard.suit.symbol}...`);
-
-                        const cpuSeatEl = this.domHands[cpuIndex] || this.domSeats[cpuIndex];
-
-                        // Trigger flying card visual animation for CPU
-                        this.animateCardFlyToDiscard(cpuSeatEl, cardToDiscard, cpuPlayer.name, () => {
-                            this.discardPile.push(cardToDiscard);
-                            this.renderDiscardPile(true);
-
-                            // Check 41 for CPU
-                            const cpuScore = evaluateHandScore(cpuPlayer.hand);
-                            if (cpuScore.isFortyOne) {
-                                sounds.playFortyOneExplosion();
-                                this.logActivity(`FORTY ONE! ${cpuPlayer.name} mencapai 41 POIN!`);
-                                this.endRound(`${cpuPlayer.name} Mencapai 41 Poin!`);
-                                return;
-                            }
-
-                            // Check deck count
-                            if (this.deck.remaining() === 0) {
-                                this.logActivity('Deck habis! Menghitung skor akhir...');
-                                this.endRound('Kartu di deck telah habis!');
-                                return;
-                            }
-
-                            setTimeout(() => {
-                                this.hideCpuBubble(cpuIndex);
-                                this.nextTurn();
-                            }, 500);
-                        });
                     } else {
                         this.nextTurn();
                     }
-                }, 750);
+                }, 750));
             };
 
             if (drawSource === 'discard' && this.discardPile.length > 0) {
                 drawnCard = this.discardPile.pop();
+                if (!drawnCard) {
+                    this.nextTurn();
+                    return;
+                }
                 this.showCpuBubble(cpuIndex, cpuPlayer.getReactionText('draw_discard', `${drawnCard.rank}${drawnCard.suit.symbol}`));
                 this.logActivity(`${cpuPlayer.name} mengambil ${drawnCard.rank}${drawnCard.suit.symbol} dari tumpukan buangan.`);
 
                 // Animate draw from discard into CPU hand
                 this.animateCardFlyDraw(this.domDiscardPile, this.domHands[cpuIndex], drawnCard, true, () => {
                     this.renderDiscardPile();
-                    cpuPlayer.hand.push(drawnCard);
+                    if (!cpuPlayer.hand.some(c => c.id === drawnCard.id)) {
+                        cpuPlayer.hand.push(drawnCard);
+                    }
                     this.renderCpuHand(cpuIndex);
                     handleCpuDiscardStep();
                 });
@@ -1004,18 +1063,24 @@ class GameController {
                     return;
                 }
                 drawnCard = this.deck.draw();
+                if (!drawnCard) {
+                    this.nextTurn();
+                    return;
+                }
                 this.updateDeckCount();
                 this.showCpuBubble(cpuIndex, cpuPlayer.getReactionText('draw_stock'));
                 this.logActivity(`${cpuPlayer.name} menarik kartu dari Deck (Cangkul)...`);
 
                 // Animate draw from stock deck into CPU hand
                 this.animateCardFlyDraw(this.domStockCardTop, this.domHands[cpuIndex], drawnCard, false, () => {
-                    cpuPlayer.hand.push(drawnCard);
+                    if (!cpuPlayer.hand.some(c => c.id === drawnCard.id)) {
+                        cpuPlayer.hand.push(drawnCard);
+                    }
                     this.renderCpuHand(cpuIndex);
                     handleCpuDiscardStep();
                 });
             }
-        }, 900);
+        }, 900));
     }
 
     nextTurn() {

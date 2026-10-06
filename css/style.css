@@ -2296,24 +2296,42 @@ body {
         white-space: nowrap;
     }
 
-    .brand-text span {
-        display: none;
+    .game-header {
+        padding: 3px 6px;
+        gap: 3px;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .game-header .brand {
+        gap: 4px;
+        flex-shrink: 0;
+    }
+
+    .game-header .brand-text {
+        display: none; /* Hide brand title text on mobile to give room for all header buttons */
+    }
+
+    .brand-logo-mini {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        padding: 2px;
     }
 
     .header-controls {
         display: flex;
         align-items: center;
-        gap: 4px;
-        flex-shrink: 1;
-        min-width: 0;
+        gap: 3px;
+        flex-shrink: 0;
     }
 
     .chip-counter {
-        padding: 3px 6px;
-        font-size: 0.72rem;
-        gap: 3px;
+        padding: 2px 5px;
+        font-size: 0.68rem;
+        gap: 2px;
         white-space: nowrap;
-        border-radius: 14px;
+        border-radius: 12px;
     }
 
     .chip-counter.rounds-badge {
@@ -2321,24 +2339,24 @@ body {
     }
 
     .game-header .btn-sm {
-        width: 30px;
-        height: 30px;
-        min-width: 30px;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
         padding: 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.8rem;
-        border-radius: 8px;
+        font-size: 0.75rem;
+        border-radius: 7px;
         flex-shrink: 0;
     }
 
     .game-header .icon-btn {
-        width: 30px;
-        height: 30px;
-        min-width: 30px;
-        font-size: 0.8rem;
-        border-radius: 8px;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: 0.75rem;
+        border-radius: 7px;
         flex-shrink: 0;
     }
 
