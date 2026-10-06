@@ -2313,48 +2313,78 @@ body {
     .player-seat.seat-bottom {
         padding-bottom: 2px;
         width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .player-hud-bar {
-        padding: 4px 8px;
+        padding: 4px 6px;
         border-radius: 12px;
-        gap: 6px;
+        gap: 3px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
         justify-content: space-between;
     }
 
+    .user-avatar-box {
+        gap: 4px;
+        flex-shrink: 0;
+    }
+
     .user-avatar-box .avatar {
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+    }
+
+    .user-avatar-box .player-name {
+        font-size: 0.7rem;
     }
 
     .points-pill {
-        font-size: 0.72rem;
-        gap: 3px;
+        font-size: 0.68rem;
+        gap: 2px;
+        padding: 1px 4px;
+        border-radius: 8px;
     }
 
     .points-value {
-        font-size: 0.95rem;
+        font-size: 0.88rem;
     }
 
     .suit-score-telemetry {
-        gap: 4px;
+        gap: 2px;
+        display: flex;
+        align-items: center;
+        flex-shrink: 1;
     }
 
     .suit-badge {
-        padding: 2px 5px;
-        font-size: 0.7rem;
-        border-radius: 6px;
-        gap: 3px;
+        padding: 1px 3px;
+        font-size: 0.65rem;
+        border-radius: 5px;
+        gap: 2px;
+        min-width: 20px;
+        justify-content: center;
     }
 
     .player-action-tray {
-        gap: 4px;
+        gap: 3px;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
     }
 
     .player-action-tray .btn {
-        padding: 4px 8px;
+        padding: 4px 6px;
         font-size: 0.72rem;
+        gap: 3px;
         border-radius: 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     /* Player Hand Cards on Mobile */
