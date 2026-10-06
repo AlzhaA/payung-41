@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payung 41 - Permainan Kartu Tradisional Indonesia</title>
+    <title>Payung 41 - No In-game Transaction</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="apple-touch-icon" href="assets/logo.png">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +14,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
     <!-- ==========================================================================
@@ -39,6 +42,7 @@
             <div class="menu-brand-text">
                 <h1 class="menu-title">PAYUNG 41</h1>
                 <p class="menu-subtitle">Yang payung payung aja</p>
+                <div class="menu-transaction-tag"><i class="fa-solid fa-shield-halved text-gold"></i> No In-game Transaction</div>
                 <div class="menu-rule-pill">
                     <i class="fa-solid fa-crown text-gold"></i> As = 11 Pts &bull; Gambar = 10 Pts &bull; Target = 41 Pts
                 </div>
@@ -53,7 +57,7 @@
                     </div>
                     <div class="mode-info">
                         <span class="mode-title">Single Player</span>
-                        <span class="mode-desc">Bermain melawan 3 CPU cerdas (Budi, Siti, Anton)</span>
+                        <span class="mode-desc">Bermain melawan 3 CPU cerdas dengan kepribadian unik</span>
                     </div>
                     <div class="mode-arrow">
                         <i class="fa-solid fa-chevron-right"></i>
@@ -79,6 +83,9 @@
             <div class="menu-footer-actions">
                 <button id="btn-menu-rules" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-book-open text-gold"></i> Aturan Main
+                </button>
+                <button id="btn-menu-disclaimer" class="btn btn-secondary btn-sm" title="Informasi Penting">
+                    <i class="fa-solid fa-shield-halved text-gold"></i> Informasi Penting
                 </button>
                 <button id="btn-menu-sound" class="btn btn-secondary btn-sm" title="Toggle Suara">
                     <i class="fa-solid fa-volume-high"></i> Suara: ON
@@ -328,6 +335,7 @@
             </div>
         </main>
     </div>
+</div>
 
     <!-- Turn Order Determination (High Card Draw / Cangkul Penentu Giliran) Modal -->
     <div class="modal-overlay" id="modal-draw-turn">
@@ -426,6 +434,66 @@
         </div>
     </div>
 
+    <!-- Disclaimer / Warning Modal (First load popup) -->
+    <div class="modal-overlay active" id="modal-disclaimer">
+        <div class="modal-card modal-disclaimer-card">
+            <div class="modal-header disclaimer-header">
+                <h2><i class="fa-solid fa-shield-halved text-gold"></i> Informasi Penting</h2>
+                <button class="modal-close" id="btn-close-disclaimer" title="Tutup">&times;</button>
+            </div>
+            <div class="modal-body disclaimer-body">
+                <!-- Highlight Alert Card -->
+                <div class="disclaimer-highlight-box">
+                    <div class="disclaimer-badge-icon">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="disclaimer-highlight-text">
+                        <h4>Permainan Kartu Hiburan Tradisional</h4>
+                        <p>Aplikasi ini dibuat murni untuk sarana <strong>hiburan santai dan asah strategi</strong> bermain kartu Forty-One (41).</p>
+                    </div>
+                </div>
+
+                <!-- Points Breakdown -->
+                <div class="disclaimer-points-list">
+                    <div class="disclaimer-item">
+                        <div class="disclaimer-item-icon">
+                            <i class="fa-solid fa-ban text-gold"></i>
+                        </div>
+                        <div class="disclaimer-item-content">
+                            <strong>100% Bebas Unsur Taruhan (No Gambling)</strong>
+                            <p>Permainan ini sama sekali <strong>tidak memfasilitasi taruhan</strong> dalam bentuk uang asli, barang berharga, maupun komoditas lainnya.</p>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer-item">
+                        <div class="disclaimer-item-icon">
+                            <i class="fa-solid fa-hand-holding-dollar text-gold"></i>
+                        </div>
+                        <div class="disclaimer-item-content">
+                            <strong>Tanpa Transaksi Finansial (No In-Game Transaction)</strong>
+                            <p>Tidak ada sistem deposit, top-up saldo berbayar, penarikan dana (withdraw), maupun pembelian item di dalam game.</p>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer-item">
+                        <div class="disclaimer-item-icon">
+                            <i class="fa-solid fa-coins text-gold"></i>
+                        </div>
+                        <div class="disclaimer-item-content">
+                            <strong>Skor & Poin Virtual Simulasi</strong>
+                            <p>Seluruh angka koin, skor, dan poin yang tertera hanya berfungsi sebagai simulasi skor pertandingan ronde melawan komputer (AI).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer disclaimer-footer">
+                <button class="btn btn-primary btn-lg disclaimer-btn" id="btn-agree-disclaimer">
+                    <i class="fa-solid fa-check"></i> Saya Mengerti & Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Rules Modal -->
     <div class="modal-overlay" id="modal-rules">
         <div class="modal-card">
@@ -515,9 +583,9 @@
     <canvas id="confetti-canvas"></canvas>
 
     <!-- Audio & Scripts -->
-    <script src="js/audio.js"></script>
-    <script src="js/cards.js"></script>
-    <script src="js/ai.js"></script>
-    <script src="js/game.js"></script>
+    <script src="js/audio.js?v=2"></script>
+    <script src="js/cards.js?v=2"></script>
+    <script src="js/ai.js?v=2"></script>
+    <script src="js/game.js?v=2"></script>
 </body>
 </html>

@@ -3,6 +3,12 @@
  * Manages game state, turns, user interactions, animations, telemetry, and scoring.
  */
 
+const BOT_NAMES_POOL = [
+    'Alzha', 'Fadhil', 'Moreno', 'Bayu', 'Apri',
+    'Alpin', 'Faris', 'Reiki', 'Thorik', 'Dennys',
+    'Bobby', 'Bara', 'Aji', 'Farhan', 'Yogi'
+];
+
 class GameController {
     constructor() {
         this.deck = new Deck();
@@ -14,17 +20,61 @@ class GameController {
         this.selectedCardId = null;
         this.isProcessing = false;
 
-        // Players initialization
-        this.players = [
-            { id: 0, name: 'Kamu', isHuman: true, hand: [], cumulativeScore: 0 },
-            new AIPlayer(1, 'Budi (CPU 1)', 'fa-user-ninja', 'balanced'),
-            new AIPlayer(2, 'Siti (CPU 2)', 'fa-robot', 'cautious'),
-            new AIPlayer(3, 'Anton (CPU 3)', 'fa-user-astronaut', 'aggressive')
-        ];
+        // Players initialization with randomized bot names
+        this.randomizeBotPlayers();
 
         this.initDOMReferences();
+        this.updatePlayerNamesInDOM();
         this.initEventListeners();
         this.initConfetti();
+
+        // Show Disclaimer Modal on first load (Main Menu)
+        this.showDisclaimerModal();
+    }
+
+    /**
+     * Randomly picks 3 unique names from BOT_NAMES_POOL for CPU 1, CPU 2, and CPU 3
+     */
+    randomizeBotPlayers() {
+        const shuffled = [...BOT_NAMES_POOL].sort(() => 0.5 - Math.random());
+        const selectedNames = shuffled.slice(0, 3);
+
+        const botConfigs = [
+            { id: 1, icon: 'fa-user-ninja', personality: 'balanced' },
+            { id: 2, icon: 'fa-robot', personality: 'cautious' },
+            { id: 3, icon: 'fa-user-astronaut', personality: 'aggressive' }
+        ];
+
+        this.players = [
+            { id: 0, name: 'Kamu', isHuman: true, hand: [], cumulativeScore: 0 },
+            ...botConfigs.map((cfg, idx) => {
+                const name = selectedNames[idx];
+                return new AIPlayer(cfg.id, `${name} (CPU ${cfg.id})`, cfg.icon, cfg.personality);
+            })
+        ];
+    }
+
+    /**
+     * Updates all seat labels and draw-turn modal slots with the active bot names
+     */
+    updatePlayerNamesInDOM() {
+        for (let i = 1; i <= 3; i++) {
+            const player = this.players[i];
+            if (!player) continue;
+
+            // Update seat name label on the board
+            const seatNameEl = document.querySelector(`#seat-cpu${i} .player-name`);
+            if (seatNameEl) {
+                seatNameEl.textContent = player.name;
+            }
+
+            // Update player name in the first-turn draw modal slot
+            const drawNameEl = document.querySelector(`#draw-slot-${i} .draw-player-name`);
+            if (drawNameEl) {
+                const baseName = player.name.replace(/\s*\(CPU\s*\d+\)/i, '');
+                drawNameEl.textContent = baseName;
+            }
+        }
     }
 
     initDOMReferences() {
@@ -34,6 +84,7 @@ class GameController {
         this.domBtnModeSingle = document.getElementById('btn-mode-single');
         this.domBtnModeMulti = document.getElementById('btn-mode-multi');
         this.domBtnMenuRules = document.getElementById('btn-menu-rules');
+        this.domBtnMenuDisclaimer = document.getElementById('btn-menu-disclaimer');
         this.domBtnMenuSound = document.getElementById('btn-menu-sound');
         this.domBtnBackMenu = document.getElementById('btn-back-menu');
 
@@ -101,6 +152,9 @@ class GameController {
         this.domTelemetryDiamonds = document.querySelector('#telemetry-diamonds .suit-val');
 
         // Modals
+        this.domDisclaimerModal = document.getElementById('modal-disclaimer');
+        this.domCloseDisclaimerBtn = document.getElementById('btn-close-disclaimer');
+        this.domAgreeDisclaimerBtn = document.getElementById('btn-agree-disclaimer');
         this.domRulesModal = document.getElementById('modal-rules');
         this.domCloseRulesBtn = document.getElementById('btn-close-rules');
         this.domUnderstoodBtn = document.getElementById('btn-understood');
@@ -140,6 +194,10 @@ class GameController {
         if (this.domBtnModeSingle) {
             this.domBtnModeSingle.addEventListener('click', () => {
                 sounds.playClick();
+                this.randomizeBotPlayers();
+                this.updatePlayerNamesInDOM();
+                this.currentRound = 1;
+                this.domCurrentRound.textContent = '1';
                 this.showGameScreen();
                 this.startNewRound();
             });
@@ -159,6 +217,12 @@ class GameController {
             });
         }
 
+        if (this.domBtnMenuDisclaimer) {
+            this.domBtnMenuDisclaimer.addEventListener('click', () => {
+                this.showDisclaimerModal();
+            });
+        }
+
         if (this.domBtnMenuSound) {
             this.domBtnMenuSound.addEventListener('click', () => {
                 const isEnabled = sounds.toggle();
@@ -172,6 +236,21 @@ class GameController {
                 const isEnabled = sounds.toggle();
                 this.syncSoundButtons(isEnabled);
                 this.logActivity(isEnabled ? 'Suara diaktifkan' : 'Suara dimatikan');
+            });
+        }
+
+        // Disclaimer modal
+        if (this.domCloseDisclaimerBtn) {
+            this.domCloseDisclaimerBtn.addEventListener('click', () => this.hideDisclaimerModal());
+        }
+        if (this.domAgreeDisclaimerBtn) {
+            this.domAgreeDisclaimerBtn.addEventListener('click', () => this.hideDisclaimerModal());
+        }
+        if (this.domDisclaimerModal) {
+            this.domDisclaimerModal.addEventListener('click', (e) => {
+                if (e.target === this.domDisclaimerModal) {
+                    this.hideDisclaimerModal();
+                }
             });
         }
 
@@ -1158,6 +1237,20 @@ class GameController {
         this.domRulesModal.classList.remove('active');
     }
 
+    showDisclaimerModal() {
+        if (this.domDisclaimerModal) {
+            this.domDisclaimerModal.classList.add('active');
+            sounds.playClick();
+        }
+    }
+
+    hideDisclaimerModal() {
+        if (this.domDisclaimerModal) {
+            this.domDisclaimerModal.classList.remove('active');
+            sounds.playClick();
+        }
+    }
+
     /* Confetti Particle Engine */
     initConfetti() {
         this.canvas = document.getElementById('confetti-canvas');
@@ -1238,6 +1331,9 @@ class GameController {
     }
 
     showGameScreen() {
+        if (this.domDisclaimerModal) {
+            this.domDisclaimerModal.classList.remove('active');
+        }
         if (this.domScreenMainMenu) {
             this.domScreenMainMenu.classList.remove('active');
         }
