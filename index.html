@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payung 41 - Permainan Kartu Tradisional Indonesia</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ==========================================================================
+         SCREEN 1: MAIN MENU (PAYUNG 41)
+         ========================================================================== -->
+    <div class="screen-view active" id="screen-main-menu">
+        <!-- Ambient Floating Suits Background -->
+        <div class="menu-ambient-bg">
+            <span class="ambient-suit ambient-spade">&spades;</span>
+            <span class="ambient-suit ambient-heart">&hearts;</span>
+            <span class="ambient-suit ambient-club">&clubs;</span>
+            <span class="ambient-suit ambient-diamond">&diams;</span>
+        </div>
+
+        <div class="main-menu-card">
+            <!-- Brand Logo with Golden Halo -->
+            <div class="menu-logo-container">
+                <div class="menu-logo-glow"></div>
+                <div class="menu-logo-frame">
+                    <img src="assets/logo.png" alt="Logo Payung 41" class="menu-logo-img">
+                </div>
+            </div>
+
+            <!-- Game Title & Tagline -->
+            <div class="menu-brand-text">
+                <h1 class="menu-title">PAYUNG 41</h1>
+                <p class="menu-subtitle">Yang payung payung aja</p>
+                <div class="menu-rule-pill">
+                    <i class="fa-solid fa-crown text-gold"></i> As = 11 Pts &bull; Gambar = 10 Pts &bull; Target = 41 Pts
+                </div>
+            </div>
+
+            <!-- Game Mode Selections -->
+            <div class="menu-actions-group">
+                <!-- Single Player Mode (Active) -->
+                <button id="btn-mode-single" class="menu-mode-btn btn-single-player">
+                    <div class="mode-icon-box">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div class="mode-info">
+                        <span class="mode-title">Single Player</span>
+                        <span class="mode-desc">Bermain melawan 3 CPU cerdas (Budi, Siti, Anton)</span>
+                    </div>
+                    <div class="mode-arrow">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </button>
+
+                <!-- Multiplayer Mode (Disabled / Greyed Out) -->
+                <button id="btn-mode-multi" class="menu-mode-btn btn-multiplayer-disabled" disabled title="Mode Multiplayer sedang dalam tahap pengembangan">
+                    <div class="mode-icon-box mode-icon-disabled">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="mode-info">
+                        <div class="mode-title-row">
+                            <span class="mode-title">Multiplayer Online</span>
+                            <span class="badge-coming-soon"><i class="fa-solid fa-lock"></i> Segera Hadir</span>
+                        </div>
+                        <span class="mode-desc">Bermain bersama teman secara daring secara real-time</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Secondary Quick Action Links -->
+            <div class="menu-footer-actions">
+                <button id="btn-menu-rules" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-book-open text-gold"></i> Aturan Main
+                </button>
+                <button id="btn-menu-sound" class="btn btn-secondary btn-sm" title="Toggle Suara">
+                    <i class="fa-solid fa-volume-high"></i> Suara: ON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         SCREEN 2: GAME TABLE SCREEN
+         ========================================================================== -->
+    <div class="screen-view" id="screen-game">
+        <div class="table-container">
+            <!-- Top Navigation / Game Header -->
+            <header class="game-header">
+                <div class="brand">
+                    <div class="brand-logo-mini">
+                        <img src="assets/logo.png" alt="Payung 41" class="header-logo-img">
+                    </div>
+                    <div class="brand-text">
+                        <h1>PAYUNG 41</h1>
+                        <span>FORTY-ONE PRO</span>
+                    </div>
+                </div>
+
+                <div class="header-controls">
+                    <button id="btn-back-menu" class="btn btn-secondary btn-sm" title="Kembali ke Menu Utama">
+                        <i class="fa-solid fa-house text-gold"></i> <span class="btn-text-hide-mobile">Menu Utama</span>
+                    </button>
+                    <div class="chip-counter">
+                        <i class="fa-solid fa-trophy text-gold"></i>
+                        <span>Skor: <strong id="player-cumulative-score">0</strong></span>
+                    </div>
+                    <div class="chip-counter rounds-badge">
+                        <i class="fa-solid fa-layer-group text-accent"></i>
+                        <span>Ronde: <strong id="current-round">1</strong></span>
+                    </div>
+                    <button id="btn-sound" class="icon-btn" title="Toggle Suara" aria-label="Toggle Suara">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <button id="btn-rules" class="icon-btn" title="Aturan Main" aria-label="Aturan Main">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </button>
+                    <button id="btn-shuffle" class="btn btn-secondary btn-sm" title="Kocok Ulang Kartu">
+                        <i class="fa-solid fa-shuffle text-gold"></i> <span class="btn-text-hide-mobile">Kocok Kartu</span>
+                    </button>
+                    <button id="btn-restart" class="btn btn-secondary btn-sm" title="Mulai Ronde Baru">
+                        <i class="fa-solid fa-rotate-right"></i> <span class="btn-text-hide-mobile">Reset Ronde</span>
+                    </button>
+                </div>
+            </header>
+
+        <!-- Main Casino Felt Board Area -->
+        <main class="casino-felt">
+            <div class="felt-inner-ring"></div>
+            
+            <!-- CPU 2 (Top / Opposite Player) -->
+            <div class="player-seat seat-top" id="seat-cpu2">
+                <div class="player-avatar-box">
+                    <div class="avatar cpu-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                        <span class="status-indicator"></span>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name">Siti (CPU 2)</span>
+                        <div class="player-stat-tag"><i class="fa-solid fa-coins"></i> <span id="score-cpu2">0 Pts</span></div>
+                    </div>
+                </div>
+                <div class="cards-hand cpu-hand top-hand" id="hand-cpu2">
+                    <!-- Cards injected via JS -->
+                </div>
+                <div class="cpu-bubble" id="bubble-cpu2">Menunggu giliran...</div>
+            </div>
+
+            <!-- CPU 1 (Left Player) -->
+            <div class="player-seat seat-left" id="seat-cpu1">
+                <div class="player-avatar-box">
+                    <div class="avatar cpu-avatar">
+                        <i class="fa-solid fa-user-ninja"></i>
+                        <span class="status-indicator"></span>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name">Budi (CPU 1)</span>
+                        <div class="player-stat-tag"><i class="fa-solid fa-coins"></i> <span id="score-cpu1">0 Pts</span></div>
+                    </div>
+                </div>
+                <div class="cards-hand cpu-hand left-hand" id="hand-cpu1">
+                    <!-- Cards injected via JS -->
+                </div>
+                <div class="cpu-bubble" id="bubble-cpu1">Menunggu giliran...</div>
+            </div>
+
+            <!-- Center Table: Draw Deck, Discard Waste Pile & Info -->
+            <div class="table-center">
+                <!-- Shuffle Animation Overlay (Active during shuffling) -->
+                <div class="shuffle-stage" id="shuffle-stage">
+                    <div class="shuffle-packet packet-left" id="packet-left">
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                    </div>
+                    <div class="shuffle-cascade" id="shuffle-cascade">
+                        <!-- Cascading riffle leaves created during animation -->
+                    </div>
+                    <div class="shuffle-packet packet-right" id="packet-right">
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                        <div class="game-card card-back shuffle-card-leaf"></div>
+                    </div>
+                </div>
+
+                <div class="center-stage" id="center-stage-piles">
+                    <!-- Stock Draw Pile -->
+                    <div class="deck-area draw-deck-area" id="deck-draw">
+                        <div class="pile-label">
+                            <i class="fa-solid fa-layer-group"></i> AMBIL KARTU
+                        </div>
+                        <div class="card-pile-wrapper" id="stock-pile">
+                            <div class="game-card card-back-stacked deck-stack-3"></div>
+                            <div class="game-card card-back-stacked deck-stack-2"></div>
+                            <div class="game-card card-back-stacked deck-stack-1"></div>
+                            <div class="game-card card-back-main clickable-deck" id="stock-card-top">
+                                <div class="deck-pattern">
+                                    <div class="deck-emblem">41</div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="cards-remaining-badge"><span id="cards-left-count">36</span> Kartu</span>
+                    </div>
+
+                    <!-- Center Emblem / Game Status Banner -->
+                    <div class="center-banner" id="center-banner">
+                        <div class="turn-announcer" id="turn-announcer">
+                            <span class="turn-pulse"></span>
+                            <span id="turn-text">Giliran Kamu!</span>
+                        </div>
+                        <div class="turn-instruction" id="turn-instruction">
+                            Tarik 1 kartu dari Deck atau Tumpukan Buangan
+                        </div>
+                    </div>
+
+                    <!-- Discard Waste Pile -->
+                    <div class="deck-area discard-deck-area" id="deck-discard">
+                        <div class="pile-label">
+                            <i class="fa-solid fa-trash-can-arrow-up"></i> TUMPUKAN BUANGAN
+                        </div>
+                        <div class="card-pile-wrapper" id="discard-pile">
+                            <div class="discard-placeholder">KOSONG</div>
+                            <!-- Active top discarded card rendered here -->
+                        </div>
+                        <div class="discard-actions-box">
+                            <div class="last-discard-tag" id="last-discard-tag" style="display: none;">
+                                <i class="fa-solid fa-clock-rotate-left"></i> <span id="last-discard-text">-</span>
+                            </div>
+                            <button id="btn-take-discard" class="action-mini-btn" disabled>
+                                <i class="fa-solid fa-hand-holding"></i> Ambil Terbuka
+                            </button>
+                        </div>
+                        <div class="discard-drop-hint" id="discard-drop-hint">
+                            <i class="fa-solid fa-arrow-down"></i> Klik kartu lalu buang ke sini
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Log Activity Feed -->
+                <div class="game-ticker">
+                    <i class="fa-solid fa-bell text-gold"></i>
+                    <div class="ticker-content" id="live-activity-log">Selamat datang di Game Kartu 41! Tekan Ambil Kartu untuk memulai.</div>
+                </div>
+            </div>
+
+            <!-- CPU 3 (Right Player) -->
+            <div class="player-seat seat-right" id="seat-cpu3">
+                <div class="player-avatar-box">
+                    <div class="avatar cpu-avatar">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                        <span class="status-indicator"></span>
+                    </div>
+                    <div class="player-details">
+                        <span class="player-name">Anton (CPU 3)</span>
+                        <div class="player-stat-tag"><i class="fa-solid fa-coins"></i> <span id="score-cpu3">0 Pts</span></div>
+                    </div>
+                </div>
+                <div class="cards-hand cpu-hand right-hand" id="hand-cpu3">
+                    <!-- Cards injected via JS -->
+                </div>
+                <div class="cpu-bubble" id="bubble-cpu3">Menunggu giliran...</div>
+            </div>
+
+            <!-- Human Player Seat (Bottom) -->
+            <div class="player-seat seat-bottom" id="seat-player">
+                <div class="player-hud-bar">
+                    <div class="player-avatar-box user-avatar-box">
+                        <div class="avatar user-avatar">
+                            <i class="fa-solid fa-user-tie"></i>
+                            <span class="status-indicator user-active-glow"></span>
+                        </div>
+                        <div class="player-details">
+                            <span class="player-name">Kamu</span>
+                            <div class="points-pill">
+                                <span class="points-label">Total:</span>
+                                <span class="points-value" id="user-current-points">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suit breakdown telemetry -->
+                    <div class="suit-score-telemetry">
+                        <div class="suit-badge suit-spade" id="telemetry-spades">
+                            <span class="suit-icon">&spades;</span>
+                            <span class="suit-val">0</span>
+                        </div>
+                        <div class="suit-badge suit-heart" id="telemetry-hearts">
+                            <span class="suit-icon">&hearts;</span>
+                            <span class="suit-val">0</span>
+                        </div>
+                        <div class="suit-badge suit-club" id="telemetry-clubs">
+                            <span class="suit-icon">&clubs;</span>
+                            <span class="suit-val">0</span>
+                        </div>
+                        <div class="suit-badge suit-diamond" id="telemetry-diamonds">
+                            <span class="suit-icon">&diams;</span>
+                            <span class="suit-val">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="player-action-tray">
+                        <button id="btn-discard" class="btn btn-primary" disabled>
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i> <span class="btn-text-hide-mobile">Buang Kartu</span><span class="btn-text-mobile-only">Buang</span>
+                        </button>
+                        <button id="btn-knock" class="btn btn-warning" title="Tutup kartu jika merasa poinmu tertinggi" disabled>
+                            <i class="fa-solid fa-gavel"></i> <span class="btn-text-hide-mobile">Tutup (Knock)</span><span class="btn-text-mobile-only">Knock</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player Hand Cards -->
+                <div class="cards-hand player-hand" id="hand-player">
+                    <!-- Dynamic Cards with 3D animation -->
+                </div>
+                <div class="hand-tip" id="hand-instruction-tip">
+                    <i class="fa-solid fa-info-circle"></i> Klik salah satu kartu di atas untuk memilih kartu yang ingin dibuang.
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Turn Order Determination (High Card Draw / Cangkul Penentu Giliran) Modal -->
+    <div class="modal-overlay" id="modal-draw-turn">
+        <div class="modal-card modal-draw-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-dice text-gold"></i> Penentuan Giliran Pertama</h2>
+            </div>
+            <div class="modal-body">
+                <p class="draw-intro-text">Masing-masing pemain mencangkul 1 kartu dari deck. Kartu tertinggi mulai bermain duluan!</p>
+                
+                <!-- Suit Hierarchy Badge Guide -->
+                <div class="draw-hierarchy-guide">
+                    <span class="guide-title"><i class="fa-solid fa-ranking-star text-gold"></i> Hirarki Simbol:</span>
+                    <span class="hierarchy-item suit-diamond">♦ Ketupat (1)</span>
+                    <span class="hierarchy-arrow">&lt;</span>
+                    <span class="hierarchy-item suit-club">♣ Keriting (2)</span>
+                    <span class="hierarchy-arrow">&lt;</span>
+                    <span class="hierarchy-item suit-heart">♥ Hati (3)</span>
+                    <span class="hierarchy-arrow">&lt;</span>
+                    <span class="hierarchy-item suit-spade">♠ Skop (4)</span>
+                </div>
+
+                <!-- 4 Players Draw Grid -->
+                <div class="draw-turn-grid" id="draw-turn-grid">
+                    <!-- Player 0: You -->
+                    <div class="draw-player-slot" id="draw-slot-0">
+                        <div class="draw-avatar-row">
+                            <div class="avatar user-avatar mini"><i class="fa-solid fa-user-tie"></i></div>
+                            <span class="draw-player-name">Kamu</span>
+                        </div>
+                        <div class="draw-card-wrapper" id="draw-card-box-0">
+                            <div class="game-card card-back draw-placeholder-card">
+                                <div class="deck-pattern"><div class="deck-emblem">41</div></div>
+                            </div>
+                        </div>
+                        <div class="draw-card-val" id="draw-card-val-0">Menunggu...</div>
+                        <div class="draw-winner-badge" id="draw-winner-badge-0"><i class="fa-solid fa-crown text-gold"></i> Mulai Duluan!</div>
+                    </div>
+
+                    <!-- Player 1: Budi -->
+                    <div class="draw-player-slot" id="draw-slot-1">
+                        <div class="draw-avatar-row">
+                            <div class="avatar cpu-avatar mini"><i class="fa-solid fa-user-ninja"></i></div>
+                            <span class="draw-player-name">Budi</span>
+                        </div>
+                        <div class="draw-card-wrapper" id="draw-card-box-1">
+                            <div class="game-card card-back draw-placeholder-card">
+                                <div class="deck-pattern"><div class="deck-emblem">41</div></div>
+                            </div>
+                        </div>
+                        <div class="draw-card-val" id="draw-card-val-1">Menunggu...</div>
+                        <div class="draw-winner-badge" id="draw-winner-badge-1"><i class="fa-solid fa-crown text-gold"></i> Mulai Duluan!</div>
+                    </div>
+
+                    <!-- Player 2: Siti -->
+                    <div class="draw-player-slot" id="draw-slot-2">
+                        <div class="draw-avatar-row">
+                            <div class="avatar cpu-avatar mini"><i class="fa-solid fa-robot"></i></div>
+                            <span class="draw-player-name">Siti</span>
+                        </div>
+                        <div class="draw-card-wrapper" id="draw-card-box-2">
+                            <div class="game-card card-back draw-placeholder-card">
+                                <div class="deck-pattern"><div class="deck-emblem">41</div></div>
+                            </div>
+                        </div>
+                        <div class="draw-card-val" id="draw-card-val-2">Menunggu...</div>
+                        <div class="draw-winner-badge" id="draw-winner-badge-2"><i class="fa-solid fa-crown text-gold"></i> Mulai Duluan!</div>
+                    </div>
+
+                    <!-- Player 3: Anton -->
+                    <div class="draw-player-slot" id="draw-slot-3">
+                        <div class="draw-avatar-row">
+                            <div class="avatar cpu-avatar mini"><i class="fa-solid fa-user-astronaut"></i></div>
+                            <span class="draw-player-name">Anton</span>
+                        </div>
+                        <div class="draw-card-wrapper" id="draw-card-box-3">
+                            <div class="game-card card-back draw-placeholder-card">
+                                <div class="deck-pattern"><div class="deck-emblem">41</div></div>
+                            </div>
+                        </div>
+                        <div class="draw-card-val" id="draw-card-val-3">Menunggu...</div>
+                        <div class="draw-winner-badge" id="draw-winner-badge-3"><i class="fa-solid fa-crown text-gold"></i> Mulai Duluan!</div>
+                    </div>
+                </div>
+
+                <!-- Result Announcement Banner -->
+                <div class="draw-result-announcement" id="draw-result-announcement">
+                    <i class="fa-solid fa-circle-notch fa-spin text-gold"></i> Mengambil kartu dari tumpukan...
+                </div>
+            </div>
+            <div class="modal-footer" id="draw-modal-footer">
+                <button class="btn btn-primary" id="btn-draw-continue" style="display: none;">
+                    <i class="fa-solid fa-play"></i> Mulai Bagi Kartu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div class="modal-overlay" id="modal-rules">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-book-open text-gold"></i> Aturan Permainan Kartu 41</h2>
+                <button class="modal-close" id="btn-close-rules">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="rule-section">
+                    <h3><i class="fa-solid fa-calculator"></i> Nilai Poin Kartu</h3>
+                    <div class="points-grid">
+                        <div class="point-box">
+                            <div class="point-card-preview">As (A)</div>
+                            <div class="point-badge text-gold">11 Poin</div>
+                        </div>
+                        <div class="point-box">
+                            <div class="point-card-preview">K, Q, J, 10</div>
+                            <div class="point-badge text-gold">10 Poin</div>
+                        </div>
+                        <div class="point-box">
+                            <div class="point-card-preview">2 s/d 9</div>
+                            <div class="point-badge">Sesuai Angka</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <h3><i class="fa-solid fa-bullseye"></i> Tujuan & Cara Menghitung Poin</h3>
+                    <ul class="rule-list">
+                        <li>Setiap pemain memegang <strong>4 kartu</strong> di tangan.</li>
+                        <li>Poin dihitung dari <strong>kembang (suit) terbanyak/tertinggi</strong> yang kamu miliki (&spades;, &hearts;, &clubs;, atau &diams;).</li>
+                        <li><strong>Kombinasi 41 Sempurna</strong>: 4 kartu dengan kembang sama bernilai As (11) + Tiga kartu bernilai 10 (K/Q/J/10) = <strong>11 + 10 + 10 + 10 = 41 POIN! (Menang Mutlak Instan)</strong>.</li>
+                        <li>Jika memiliki kartu dengan kembang berbeda, poin kartu yang berbeda kembang akan menjadi <strong>pengurang/penalti</strong> dari kembang utamamu.</li>
+                    </ul>
+                </div>
+
+                <div class="rule-section">
+                    <h3><i class="fa-solid fa-arrows-spin"></i> Alur Giliran</h3>
+                    <ol class="rule-list">
+                        <li><strong>Tarik Kartu (Draw)</strong>: Ambil 1 kartu dari Deck tertutup ATAU ambil kartu terbuka dari Tumpukan Buangan (Kartu di tangan jadi 5).</li>
+                        <li><strong>Buang Kartu (Discard)</strong>: Pilih 1 kartu yang nilainya paling tidak menguntungkan untuk dibuang ke tumpukan terbuka (Kartu di tangan kembali jadi 4).</li>
+                        <li>Permainan selesai jika ada yang dapat <strong>41 Poin</strong>, melakukan <strong>Knock (Tutup)</strong>, atau kartu di tumpukan habis.</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-understood">Saya Mengerti!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over / Victory Modal -->
+    <div class="modal-overlay" id="modal-gameover">
+        <div class="modal-card modal-gameover-card">
+            <div class="victory-crown" id="gameover-crown">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <h2 class="gameover-title" id="gameover-title">HASIL PERMAINAN</h2>
+            <p class="gameover-subtitle" id="gameover-subtitle">Ronde telah berakhir!</p>
+
+            <div class="scoreboard-table-wrapper">
+                <table class="scoreboard-table">
+                    <thead>
+                        <tr>
+                            <th>Posisi</th>
+                            <th>Pemain</th>
+                            <th>Kembang Utama</th>
+                            <th>Kartu Terakhir</th>
+                            <th>Total Poin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gameover-tbody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-lg" id="btn-play-again">
+                    <i class="fa-solid fa-play"></i> Main Ronde Berikutnya
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Canvas for Confetti & Particles -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Audio & Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/cards.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
